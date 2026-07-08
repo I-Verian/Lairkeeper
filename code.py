@@ -57,6 +57,200 @@ RARITY_COLORS = {
 RARITY_LIST = list(RARITY_COLORS.keys())
 RARITY_DEFAULT_COLOR = "#9499F7"
 
+SPECIES_CAN_FLY = {
+    'Aeroseys': True,
+    'Aethereus': True,
+    'Alatura': True,
+    'Allpehourn': True,
+    'Amaris': True,
+    'Amoonita': True,
+    'Ancient Aranga': True,
+    'Ancient Skriffei': True,
+    'Ancient Tosknir': True,
+    'Andronaut': True,
+    'Araneaix': True,
+    'Aranga': True,
+    'Archogine': True,
+    'Arielisces': True,
+    'Astraeisis': True,
+    'Atravanta': True,
+    'Aurutentia': True,
+    'Avarakuma': True,
+    'Avefir': True,
+    'Ayatrice': True,
+    'Balgunyur': True,
+    'Betevial': True,
+    'Bylendarach': True,
+    'Caelydris': True,
+    'Calimaki': True,
+    'Canyarches': True,
+    'Carnealgon': True,
+    'Casirius': True,
+    'Catruca': True,
+    'Caudembris': True,
+    'Caunaris': True,
+    'Chameleaf': True,
+    'Chippychiip': True,
+    'Chronocus': True,
+    'Chrysaloom': False,
+    'Cirquemaar': True,
+    'Cogitergosyn': True,
+    'Constello': True,
+    'Corrupted Chronocus': True,
+    'Cosmalisk': True,
+    'Cryptillow': True,
+    'Cutiepatoo': True,
+    'Cybernid': True,
+    'Cynphion-Noire': True,
+    'Desygual': True,
+    'Diraixos': True,
+    'Djaevelhest': True,
+    'Dratheros': True,
+    'Dysuva': True,
+    'Eisendrache': True,
+    'Eryndiorn': True,
+    'Eteralix': True,
+    'Fabledrak': True,
+    'Falugeis': True,
+    'Fayrah': True,
+    'Featherfang': True,
+    'Fernifex': True,
+    'Firifeller': True,
+    'Fleurianthus': False,
+    'Flornymphis': True,
+    'Fueguin': True,
+    'Fulong': True,
+    'Garutagoyle': True,
+    'Gaulyra': False,
+    'Geoteryx': True,
+    'Glaquacus': True,
+    'Goelica': True,
+    'Goliatomb': True,
+    'Gordigourd': True,
+    'Guilmoros': True,
+    'Gundrakken': True,
+    'Gyngefared': True,
+    'Gyrocopter': True,
+    'Harvitius': True,
+    'Hexalios': True,
+    'Hielochiim': True,
+    'Hoarusn': True,
+    'Hongliang': True,
+    'Ignicaris': True,
+    'Impiavolo': True,
+    'Iridesia': True,
+    'Karukiri': True,
+    'Khalknirik': True,
+    'Khorgeryn': True,
+    'Kikien': True,
+    'Kostragula': True,
+    'Ladonix': True,
+    'Lepilon': True,
+    'Livalient': True,
+    'Lucklif': True,
+    'Lum Luenh': True,
+    'Lumenigh': True,
+    'Lunaesol': True,
+    'Lyria': True,
+    'Makoura': True,
+    'Mallopii': True,
+    'Malupentys': True,
+    'Mechanoxide': False,
+    'Mielebee': True,
+    'Mistrasune': True,
+    'Moixaura': True,
+    'Mosuraki': True,
+    'Motorouk': False,
+    'Mountain Dragon': True,
+    'Nadaler': True,
+    'Nakahii': False,
+    'Nightmare Paranox': True,
+    'Noctorius': True,
+    "Nor'gan": True,
+    'Nyxavoid': True,
+    'Onagajin': True,
+    'Oroalas': True,
+    'Ortarouk': False,
+    'Ovicirus': True,
+    'Pagulau': True,
+    'Paladianos': True,
+    'Pananisea': True,
+    'Paranox': True,
+    'Paukiki': True,
+    'Penguitus': True,
+    'Phocaphan': True,
+    'Phyllantis': True,
+    'Polairistel': True,
+    'Putrefacceum': True,
+    'Quahtona': True,
+    'Quasaldrus': True,
+    'Quetzaloctli': True,
+    'Radidon': True,
+    'Raikami': True,
+    'Rhyndac': True,
+    'Riyu': True,
+    'Robodon': True,
+    'Roborus X': True,
+    'Rozora': False,
+    'Scrawei': True,
+    'Seikarin': True,
+    'Sentalius': True,
+    'Silvestratus': True,
+    'Skelltor': True,
+    'Skriffei': True,
+    'Skyrix': True,
+    'Smokgien': True,
+    'Snoballista': True,
+    'Solarizon': True,
+    'Soukeyi': True,
+    'Source Dragon of Energy': True,
+    'Source Dragon of Motion': True,
+    'Stellaris': True,
+    'Stratalix': True,
+    'Stymelisk': True,
+    'Suiikipon': True,
+    'Sunfloris': True,
+    'Syliru': True,
+    'Taligris': True,
+    'Tarotta': True,
+    'Tempiritus': True,
+    'Tenebis': True,
+    'Terruak': True,
+    'Thorkonyx': True,
+    'Tianma': True,
+    'Tlalocun': True,
+    'Torneidus': True,
+    'Tosknir': True,
+    'Trametos': True,
+    'Trilinaris': True,
+    'Tronat': True,
+    'Tsukuizan': True,
+    'Uheailes': True,
+    'Valkiero': True,
+    'Varana': False,
+    'Veidreki': True,
+    'Venid': True,
+    'Verdrakor': True,
+    'Verscervus': True,
+    'Viridik': True,
+    'Volkumos': True,
+    'Voltagen': True,
+    'Voltstorm': True,
+    'Vulcoramor': True,
+    'Vulpiruth': True,
+    'Vyreas': True,
+    'Woodluma': True,
+    'Wuonghou': True,
+    'Xellatruce': True,
+    'Xerthos': True,
+    'Yaruakura': True,
+    'Yggdraten': False,
+    'Yueshi': True,
+    'Yulereinn': True,
+    'Zinthros': False,
+}
+
+
 LEGACY_EXAMPLE_ACCOUNTS = {"tamaraa123", "DragonTamerSuu", "WobblyPengu"}
 
 
@@ -424,6 +618,7 @@ SPECIES_LIST = [
     'Bylendarach',
     'Caelydris',
     'Calimaki',
+    'Canyarches',
     'Carnealgon',
     'Casirius',
     'Catruca',
@@ -466,6 +661,7 @@ SPECIES_LIST = [
     'Flornymphis',
     'Fueguin',
     'Fulong',
+    'Garutagoyle',
     'Gaulyra',
     'Geliklen',
     'Geoteryx',
@@ -835,6 +1031,8 @@ SPECIES_RARITY = {
     'Suiikipon': 'Common',
     'Taihoa': 'Common',
     'Venu': 'Common',
+    'Canyarches': 'Legendary',
+    'Garutagoyle': 'Legendary',
     'Archogine': 'Legendary',
 }
 
@@ -859,6 +1057,29 @@ COSMETIC_TRAIT_LIST = [
     'Bioluminescent Aura', 'Cosmic Traveller', 'Cozy Campfire', 'Digital Make', 'Easter Bunny', 
     'Envelopes', 'Fluttering Aura', 'Homestead', 'Icicle', 'Robotics', 'Storm Circuit', 
 ]
+
+
+FLYING_ONLY_POSITIVE  = {"Strong Wing Membrane"}
+NONFLYING_ONLY_POSITIVE = {"Swifter Leap"}
+FLYING_ONLY_NEGATIVE  = {"Thin Wing Membrane"}
+
+
+def species_can_fly(species):
+    return SPECIES_CAN_FLY.get(species, True)
+
+
+def available_positive_traits(species):
+    if species_can_fly(species):
+        return [t for t in POSITIVE_TRAIT_LIST if t not in NONFLYING_ONLY_POSITIVE]
+    else:
+        return [t for t in POSITIVE_TRAIT_LIST if t not in FLYING_ONLY_POSITIVE]
+
+
+def available_negative_traits(species):
+    if species_can_fly(species):
+        return list(NEGATIVE_TRAIT_LIST)
+    else:
+        return [t for t in NEGATIVE_TRAIT_LIST if t not in FLYING_ONLY_NEGATIVE]
 
 MUTATION_CAP = 5
 GENDER_LIST = ["Male", "Female"]
@@ -943,6 +1164,7 @@ ICON_DIR = os.path.join(SCRIPT_DIR, "assets", "icons")
 LEGENDARY_SHIFT_DIR = os.path.join(SCRIPT_DIR, "assets", "legendary_shifts")
 MISC_DIR = os.path.join(SCRIPT_DIR, "assets", "misc")
 DRAGON_ICONS_DIR = os.path.join(SCRIPT_DIR, "assets", "dragonicons")
+DRAGON_IMAGES_DIR = os.path.join(SCRIPT_DIR, "assets", "dragon_images")
 COSMETIC_TRAIT_ICON_DIR = os.path.join(SCRIPT_DIR, "assets", "misc", "cosmetictrait")
 FONTS_DIR = os.path.join(SCRIPT_DIR, "assets", "fonts")
 
@@ -951,6 +1173,7 @@ os.makedirs(ICON_DIR, exist_ok=True)
 os.makedirs(LEGENDARY_SHIFT_DIR, exist_ok=True)
 os.makedirs(MISC_DIR, exist_ok=True)
 os.makedirs(DRAGON_ICONS_DIR, exist_ok=True)
+os.makedirs(DRAGON_IMAGES_DIR, exist_ok=True)
 os.makedirs(COSMETIC_TRAIT_ICON_DIR, exist_ok=True)
 os.makedirs(FONTS_DIR, exist_ok=True)
 
@@ -1097,6 +1320,8 @@ def migrate_dragon(d):
     d.setdefault("Element", "-")
     d.setdefault("Gender", "")
     d.setdefault("Soulbound", False)
+    d.setdefault("Element2", None)
+    d.setdefault("Note", "")
     d.setdefault("Birthday", None)
     d.setdefault("OriginalOwner", None)
     d.setdefault("Level", "-")
@@ -1121,6 +1346,34 @@ def _dragon_path(account_name, dragon_id):
 
 def _tabs_path(account_name):
     return os.path.join(_account_dir(account_name), "__tabs__.json")
+
+
+def _settings_path(account_name):
+    return os.path.join(_account_dir(account_name), "__settings__.json")
+
+
+def load_account_settings(account_name):
+    p = _settings_path(account_name)
+    if os.path.exists(p):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_account_settings(account_name, settings):
+    adir = _account_dir(account_name)
+    os.makedirs(adir, exist_ok=True)
+    try:
+        with open(_settings_path(account_name), "w", encoding="utf-8") as f:
+            json.dump(settings, f, indent=2)
+    except Exception as e:
+        print(f"Could not save settings for {account_name}:", e)
+
+
+account_settings = {}
 
 
 def _write_account(account_name, dragon_dict, tabs_dict):
@@ -1258,13 +1511,14 @@ def get_account_dragons():
 
 
 def switch_account(account_name):
-    global dragons, current_tabs, current_account
+    global dragons, current_tabs, current_account, account_settings
     current_account = account_name
     slot = all_accounts_data.setdefault(account_name, {})
     if TABS_KEY not in slot:
         slot[TABS_KEY] = {}
     dragons = {k: v for k, v in slot.items() if k != TABS_KEY}
     current_tabs = slot[TABS_KEY]
+    account_settings = load_account_settings(account_name)
 
 
 def persist():
@@ -1668,7 +1922,10 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
 
     W = 640
     is_traits_expanded = genetic_traits_expanded.get(name, False)
-    extra_optional_rows = sum(1 for v in (d.get("Birthday"), d.get("OriginalOwner")) if v)
+    extra_optional_rows = sum(1 for v in (d.get("Birthday"), d.get("OriginalOwner"), d.get("Element2")) if v)
+    if d.get("Note", "").strip():
+        note_lines = max(1, len(d["Note"].strip()) // 55 + 1)
+        extra_optional_rows += note_lines
     H = (990 if is_traits_expanded else 728) + extra_optional_rows * 46
     c = tk.Canvas(container, width=W, height=H,
                    bg=PALETTE["lair_bg"], highlightthickness=0)
@@ -1682,7 +1939,9 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
     round_rect(c, img_x, img_y, img_x + img_w, img_y + img_h, r=14,
                 fill="#2A2143", outline="", width=0)
     try:
-        photo = make_rounded_photo(species_icon_path(d.get("Species", "")), img_w, img_h, radius=14)
+        custom_path = custom_dragon_image_path(name)
+        icon_path = custom_path if os.path.exists(custom_path) else species_icon_path(d.get("Species", ""))
+        photo = make_rounded_photo(icon_path, img_w, img_h, radius=14)
         c._refs.append(photo)
         c.create_image(img_x + img_w / 2, img_y + img_h / 2, image=photo)
     except Exception:
@@ -1829,17 +2088,66 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
                        font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT),
                        width=24).pack(pady=4)
 
+    def handle_note():
+        current_note = d.get("Note", "")
+        dlg = tk.Toplevel(parent)
+        dlg.title(f"Note — {d['Nickname']}")
+        dlg.configure(bg=PALETTE["bg_outer"])
+        center(dlg, 460, 320)
+        tk.Label(dlg, text="Note (max 1000 characters)", fg=PALETTE["label_text"],
+                 bg=PALETTE["bg_outer"], font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT)).pack(
+            anchor="w", padx=14, pady=(14, 4))
+        txt = tk.Text(dlg, width=50, height=10, bg=PALETTE["tag_fill"], fg="white",
+                       insertbackground="white", relief="flat", wrap="word",
+                       font=(APP_FONT_FAMILY, 10), highlightthickness=1,
+                       highlightbackground=PALETTE["panel_border"])
+        txt.pack(fill="both", expand=True, padx=14, pady=(0, 4))
+        txt.insert("1.0", current_note)
+        counter_var = tk.StringVar(value=f"{len(current_note)}/1000")
+        tk.Label(dlg, textvariable=counter_var, fg=PALETTE["label_text"],
+                 bg=PALETTE["bg_outer"], font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT),
+                 anchor="e").pack(fill="x", padx=14)
+
+        def on_key(_e=None):
+            content = txt.get("1.0", "end-1c")
+            if len(content) > 1000:
+                txt.delete(f"1.0+{1000}c", "end")
+                content = content[:1000]
+            counter_var.set(f"{len(content)}/1000")
+
+        txt.bind("<KeyRelease>", on_key)
+
+        def save_note():
+            d["Note"] = txt.get("1.0", "end-1c").strip()
+            dragons[name] = d
+            persist()
+            dlg.destroy()
+
+        btn_row = tk.Frame(dlg, bg=PALETTE["bg_outer"])
+        btn_row.pack(pady=10)
+        tk.Button(btn_row, text="Save Note", command=save_note,
+                   bg=PALETTE["bar_fill"], fg="#16330F", relief="flat",
+                   font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT), padx=16, pady=6).pack(side="left", padx=6)
+        tk.Button(btn_row, text="Cancel", command=dlg.destroy,
+                   bg=PALETTE["tag_fill"], fg="white", relief="flat",
+                   font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT), padx=16, pady=6).pack(side="left", padx=6)
+        txt.focus_set()
+
     title_stack_bottom = img_y + 104 + 10
     action_y0, action_h = max(img_y + img_h, title_stack_bottom) + 10, 30
-    btn_w, btn_gap = 78, 8
+    btn_w, btn_gap = 68, 6
     delete_x0 = W - 20 - btn_w
     edit_x0 = delete_x0 - btn_gap - btn_w
-    move_x0 = edit_x0 - btn_gap - btn_w - 10
-    coll_x0 = move_x0 - btn_gap - btn_w - 14
-    rounded_button(c, coll_x0, action_y0, btn_w + 14, action_h, "+ Collection",
+    move_x0 = edit_x0 - btn_gap - btn_w
+    coll_x0 = move_x0 - btn_gap - btn_w - 6
+    note_x0 = coll_x0 - btn_gap - btn_w + 2
+    rounded_button(c, note_x0, action_y0, btn_w - 2, action_h, "Note",
+                    handle_note, r=10,
+                    fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"])
+    rounded_button(c, coll_x0, action_y0, btn_w + 6, action_h, "+ Collection",
                     handle_add_to_collection, r=10,
                     fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"])
-    rounded_button(c, move_x0, action_y0, btn_w + 10, action_h, "Move",
+    rounded_button(c, move_x0, action_y0, btn_w, action_h, "Move",
                     handle_move_to_account, r=10,
                     fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"])
     rounded_button(c, edit_x0, action_y0, btn_w, action_h, "Edit", handle_edit, r=10,
@@ -1871,6 +2179,11 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
         ("plain", "Generation", None, d.get("Generation", "-")),
     ]
 
+    element2 = d.get("Element2")
+    if element2:
+        row_defs.insert(row_defs.index(("icon", "Pupil", element, d.get("Pupil", "-"))),
+                         ("icon", "Element 2", element2, element2))
+
     if d.get("Birthday"):
         try:
             bdt = date.fromisoformat(d["Birthday"])
@@ -1881,6 +2194,9 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
 
     if d.get("OriginalOwner"):
         row_defs.append(("plain", "Original Owner", None, d["OriginalOwner"]))
+
+    if d.get("Note", "").strip():
+        row_defs.append(("note", "Note", None, d["Note"].strip()))
 
     ry = header_y1 + 8
     for kind, label, icon, value in row_defs:
@@ -1914,6 +2230,16 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
                           font=(APP_FONT_FAMILY, 14, APP_FONT_WEIGHT), anchor="w")
             outline_text(c, rx + rw - 18, rcy, str(value), (APP_FONT_FAMILY, 15, APP_FONT_WEIGHT),
                          PALETTE["value_text"], PALETTE["value_outline"], anchor="e")
+        elif kind == "note":
+            note_text = str(value)
+            note_h = max(row_h, 20 + (len(note_text) // 55) * 18)
+            draw_appearance_row_bg(c, rx, ry, rw, note_h)
+            c.create_text(rx + 20, ry + 12, text="Note", fill=PALETTE["label_text"],
+                          font=(APP_FONT_FAMILY, 11, APP_FONT_WEIGHT), anchor="nw")
+            c.create_text(rx + 20, ry + 28, text=note_text, fill=PALETTE["value_text"],
+                          font=(APP_FONT_FAMILY, 10), anchor="nw", width=rw - 36, justify="left")
+            ry += note_h + row_gap
+            continue
         else:
             draw_row_icon(c, rx + 18, rcy, label, icon)
             c.create_text(rx + 44, rcy, text=label, fill=PALETTE["label_text"],
@@ -1975,7 +2301,9 @@ def make_dragon_card(parent, name, d, on_click):
     c._refs = []
 
     try:
-        photo = make_rounded_photo(species_icon_path(d.get("Species", "")), 100, 100, radius=14)
+        custom_path = custom_dragon_image_path(name)
+        icon_path = custom_path if os.path.exists(custom_path) else species_icon_path(d.get("Species", ""))
+        photo = make_rounded_photo(icon_path, 100, 100, radius=14)
         c._refs.append(photo)
         c.create_image(w / 2, 70, image=photo)
     except Exception:
@@ -1983,6 +2311,12 @@ def make_dragon_card(parent, name, d, on_click):
                     fill=RARITY_COLORS.get(d["Rarity"], "#888888"))
         c.create_text(w / 2, 70, text=name, fill="white",
                       font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT), width=80, justify="center")
+
+    if d.get("Note", "").strip():
+        c.create_oval(w - 22, 10, w - 10, 22, fill=PALETTE["badge_fill"],
+                       outline=PALETTE["badge_border"], width=1)
+        c.create_text(w - 16, 16, text="\u270f", fill="#3A2A06",
+                       font=(APP_FONT_FAMILY, 7, APP_FONT_WEIGHT))
 
     card_name_size = fit_text_size(d["Nickname"], APP_FONT_FAMILY, 12, 7, w - 16)
     shadowed_name_text(c, w / 2, 142, d["Nickname"], (APP_FONT_FAMILY, card_name_size, APP_FONT_WEIGHT))
@@ -2238,6 +2572,28 @@ def open_lair(root, account):
                     open_add_dragon, r=14,
                     fill=PALETTE["badge_fill"], outline=PALETTE["badge_border"],
                     text_fill="#3A2A06")
+
+    sub_on = account_settings.get("Subscription", False)
+    sub_state = {"on": sub_on}
+    sub_canvas = tk.Canvas(left, width=352, height=36, bg=PALETTE["lair_bg"], highlightthickness=0)
+    sub_canvas.pack(padx=14, pady=(0, 4))
+
+    def draw_sub_btn():
+        sub_canvas.delete("all")
+        on = sub_state["on"]
+        lbl = "\u2714 Subscription (ON)" if on else "Subscription (OFF)"
+        fill = PALETTE["bar_fill"] if on else PALETTE["tag_fill"]
+        tf = "#16330F" if on else "white"
+        rounded_button(sub_canvas, 2, 2, 350, 34, lbl,
+                        toggle_sub, r=12, fill=fill, outline=PALETTE["panel_border"], text_fill=tf)
+
+    def toggle_sub():
+        sub_state["on"] = not sub_state["on"]
+        account_settings["Subscription"] = sub_state["on"]
+        save_account_settings(current_account, account_settings)
+        draw_sub_btn()
+
+    draw_sub_btn()
 
     sda_canvas = tk.Canvas(left, width=352, height=36, bg=PALETTE["lair_bg"], highlightthickness=0)
     sda_canvas.pack(padx=14, pady=(0, 4))
@@ -2598,6 +2954,26 @@ def legendary_shift_path(element):
 
 def gender_icon_path(gender):
     return os.path.join(MISC_DIR, f"{gender.lower()}.png")
+
+
+def custom_dragon_image_path(dragon_id):
+    return os.path.join(DRAGON_IMAGES_DIR, f"{dragon_id}.png")
+
+
+def import_dragon_custom_image(source_path, dragon_id):
+    """Copies and resizes a user-chosen image into assets/dragon_images/
+    at a consistent 200x200 max, preserving transparency. Returns the
+    destination path, or None on failure."""
+    try:
+        img = Image.open(source_path).convert("RGBA")
+        img = autocrop_to_content(img)
+        img.thumbnail((200, 200), Image.LANCZOS)
+        dest = custom_dragon_image_path(dragon_id)
+        img.save(dest, "PNG", optimize=True)
+        return dest
+    except Exception as e:
+        print(f"[custom icon] Failed to import {source_path}: {e}")
+        return None
 
 
 def cosmetic_trait_icon_path(trait):
@@ -2994,19 +3370,65 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
     img_row = tk.Frame(body, bg=PALETTE["bg_outer"])
     img_row.pack(pady=10)
     preview_canvas = tk.Canvas(img_row, width=100, height=100, bg=PALETTE["bg_outer"], highlightthickness=0)
-    preview_canvas.pack()
+    preview_canvas.pack(side="left", padx=(0, 12))
+
+    has_custom_icon = {"val": os.path.exists(custom_dragon_image_path(dragon_id or ""))}
 
     def update_preview():
         preview_canvas.delete("all")
         round_rect(preview_canvas, 2, 2, 98, 98, r=14, fill="#2A2143",
                     outline=PALETTE["panel_border"], width=2)
         try:
-            photo = make_rounded_photo(species_icon_path(species_var.get()), 90, 90, radius=12)
+            if has_custom_icon["val"] and dragon_id:
+                icon_path = custom_dragon_image_path(dragon_id)
+            else:
+                icon_path = species_icon_path(species_var.get())
+            photo = make_rounded_photo(icon_path, 90, 90, radius=12)
             preview_canvas._ref = photo
             preview_canvas.create_image(50, 50, image=photo)
         except Exception:
             preview_canvas.create_text(50, 50, text="No\nIcon", fill="#9B8FCC",
                                         font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT), justify="center")
+
+    icon_btn_col = tk.Frame(img_row, bg=PALETTE["bg_outer"])
+    icon_btn_col.pack(side="left")
+
+    def browse_custom_icon():
+        from tkinter import filedialog as _tkfd
+        path = _tkfd.askopenfilename(
+            title="Choose a custom dragon icon",
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.gif")])
+        if not path:
+            return
+        temp_id = dragon_id or uuid.uuid4().hex[:10]
+        result = import_dragon_custom_image(path, temp_id)
+        if result:
+            has_custom_icon["val"] = True
+            update_preview()
+            custom_label.config(text="Custom icon set")
+
+    def clear_custom_icon():
+        p = custom_dragon_image_path(dragon_id or "")
+        if os.path.exists(p):
+            try:
+                os.remove(p)
+            except Exception:
+                pass
+        has_custom_icon["val"] = False
+        update_preview()
+        custom_label.config(text="Using species default")
+
+    tk.Button(icon_btn_col, text="Upload Icon…", command=browse_custom_icon,
+               bg=PALETTE["tag_fill"], fg="white", relief="flat",
+               font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT), pady=4).pack(fill="x", pady=(0, 4))
+    tk.Button(icon_btn_col, text="Clear Custom", command=clear_custom_icon,
+               bg=PALETTE["row_fill"], fg="white", relief="flat",
+               font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT), pady=4).pack(fill="x")
+    custom_label = tk.Label(icon_btn_col,
+                             text="Custom icon set" if has_custom_icon["val"] else "Using species default",
+                             fg=PALETTE["label_text"], bg=PALETTE["bg_outer"],
+                             font=(APP_FONT_FAMILY, 8), wraplength=120, justify="left")
+    custom_label.pack(anchor="w", pady=(6, 0))
 
     nickname_var = labeled_entry(body, "Nickname", default=d.get("Nickname", ""))
 
@@ -3114,6 +3536,13 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
     element_row, element_selected = make_element_picker(elem_wrap, initial=d.get("Element", ELEMENT_LIST[0]))
     element_row.pack(anchor="w")
 
+    element2_var = None
+    if account_settings.get("Subscription", False):
+        e2_choices = ["None"] + list(ELEMENT_LIST)
+        element2_var, _e2_refresh = labeled_search_select(
+            body, "Element 2 (Subscription — optional)",
+            e2_choices, default=d.get("Element2") or "None", height=4)
+
     tk.Label(body, text="Genetic Traits", fg=PALETTE["title_fill"], bg=PALETTE["bg_outer"],
              font=(APP_FONT_FAMILY, 16, APP_FONT_WEIGHT)).pack(pady=(20, 0))
 
@@ -3130,27 +3559,47 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
         positive_trait_vars.append((tvar, nvar))
         positive_trait_combos.append((tvar, tcombo))
 
-    def enforce_unique_positive_traits(*_args):
-        chosen = {var.get() for var, _ in positive_trait_combos if var.get() != "None"}
-        for var, combo in positive_trait_combos:
-            mine = var.get()
-            available = [t for t in POSITIVE_TRAIT_LIST if t == "None" or t == mine or t not in chosen]
-            combo["values"] = available
-
-    for tvar, _ in positive_trait_combos:
-        tvar.trace_add("write", enforce_unique_positive_traits)
-    enforce_unique_positive_traits()
-
     negative_trait_vars = []
+    negative_trait_combos = []
     for i in range(MAX_NEGATIVE_TRAITS):
         existing = d_negative[i] if i < len(d_negative) else {}
-        tvar, nvar, _ = labeled_trait_row(body, f"Negative Trait {i + 1}", NEGATIVE_TRAIT_LIST,
-                                           trait_default=existing.get("Trait", "None"),
-                                           tier_default=existing.get("Tier", 1))
+        tvar, nvar, tcombo = labeled_trait_row(body, f"Negative Trait {i + 1}", NEGATIVE_TRAIT_LIST,
+                                                trait_default=existing.get("Trait", "None"),
+                                                tier_default=existing.get("Tier", 1))
         negative_trait_vars.append((tvar, nvar))
+        negative_trait_combos.append((tvar, tcombo))
+
+    def sync_trait_options(*_args):
+        sp = species_var.get()
+        pos_base = available_positive_traits(sp)
+        neg_base = available_negative_traits(sp)
+
+        chosen_pos = {var.get() for var, _ in positive_trait_combos if var.get() != "None"}
+        for var, combo in positive_trait_combos:
+            mine = var.get()
+            if mine != "None" and mine not in pos_base:
+                var.set("None")
+                mine = "None"
+            avail = [t for t in pos_base if t == "None" or t == mine or t not in chosen_pos]
+            combo["values"] = avail
+
+        for var, combo in negative_trait_combos:
+            mine = var.get()
+            if mine != "None" and mine not in neg_base:
+                var.set("None")
+            combo["values"] = neg_base
+
+    species_var.trace_add("write", sync_trait_options)
+    for tvar, _ in positive_trait_combos:
+        tvar.trace_add("write", sync_trait_options)
+    sync_trait_options()
 
     def save_dragon():
         nickname = nickname_var.get().strip() or species_var.get()
+        if len(nickname) > 20:
+            messagebox.showwarning("Nickname too long",
+                                    f"Nickname must be 20 characters or less (currently {len(nickname)}).")
+            return
 
         if bday_enabled.get() and not get_birthday_iso():
             messagebox.showwarning("Invalid birthday",
@@ -3204,6 +3653,7 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
             "MaxMutations": MUTATION_CAP,
             "CosmeticTrait": cosmetic_var.get(),
             "Element": element_selected["value"],
+            "Element2": (element2_var.get() if element2_var and element2_var.get() != "None" else None),
             "Pupil": pupil_var.get(),
             "Generation": generation,
             "Age": age,
@@ -3241,6 +3691,13 @@ def open_add_account_dialog(root, refresh_callback):
         name = name_var.get().strip()
         if not name:
             messagebox.showwarning("Missing name", "Please enter an account name.")
+            return
+        if " " in name:
+            messagebox.showwarning("Invalid name", "Account names cannot contain spaces.")
+            return
+        if len(name) > 20:
+            messagebox.showwarning("Name too long",
+                                    f"Account names must be 20 characters or less (currently {len(name)}).")
             return
         if name in all_accounts_data:
             messagebox.showwarning("Already exists", f'An account named "{name}" already exists.')
