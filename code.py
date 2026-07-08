@@ -1912,6 +1912,7 @@ def draw_trait_row(canvas, x, y, w, h, trait_entry, accent_color):
 
 
 genetic_traits_expanded = {}
+note_expanded = {}
 
 
 def show_details(parent, container, name, refresh_grid=None, active_tab=None):
@@ -1922,11 +1923,23 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
 
     W = 640
     is_traits_expanded = genetic_traits_expanded.get(name, False)
+    is_note_expanded = note_expanded.get(name, False)
+    has_note = bool(d.get("Note", "").strip())
+
     extra_optional_rows = sum(1 for v in (d.get("Birthday"), d.get("OriginalOwner"), d.get("Element2")) if v)
-    if d.get("Note", "").strip():
-        note_lines = max(1, len(d["Note"].strip()) // 55 + 1)
-        extra_optional_rows += note_lines
-    H = (990 if is_traits_expanded else 728) + extra_optional_rows * 46
+
+    base_H = 728
+    traits_extra = 262 if is_traits_expanded else 0
+
+    note_section_h = 0
+    if has_note:
+        note_section_h = 44 + 14
+        if is_note_expanded:
+            note_text = d["Note"].strip()
+            note_lines = max(1, -(-len(note_text) // 55))
+            note_section_h += note_lines * 18 + 20
+
+    H = base_H + extra_optional_rows * 46 + traits_extra + note_section_h
     c = tk.Canvas(container, width=W, height=H,
                    bg=PALETTE["lair_bg"], highlightthickness=0)
     c.pack(padx=20, pady=18)
@@ -2135,16 +2148,12 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
 
     title_stack_bottom = img_y + 104 + 10
     action_y0, action_h = max(img_y + img_h, title_stack_bottom) + 10, 30
-    btn_w, btn_gap = 68, 6
+    btn_w, btn_gap = 80, 8
     delete_x0 = W - 20 - btn_w
     edit_x0 = delete_x0 - btn_gap - btn_w
     move_x0 = edit_x0 - btn_gap - btn_w
-    coll_x0 = move_x0 - btn_gap - btn_w - 6
-    note_x0 = coll_x0 - btn_gap - btn_w + 2
-    rounded_button(c, note_x0, action_y0, btn_w - 2, action_h, "Note",
-                    handle_note, r=10,
-                    fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"])
-    rounded_button(c, coll_x0, action_y0, btn_w + 6, action_h, "+ Collection",
+    coll_x0 = move_x0 - btn_gap - 105
+    rounded_button(c, coll_x0, action_y0, 105, action_h, "+ Collection",
                     handle_add_to_collection, r=10,
                     fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"])
     rounded_button(c, move_x0, action_y0, btn_w, action_h, "Move",
@@ -2195,9 +2204,6 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
     if d.get("OriginalOwner"):
         row_defs.append(("plain", "Original Owner", None, d["OriginalOwner"]))
 
-    if d.get("Note", "").strip():
-        row_defs.append(("note", "Note", None, d["Note"].strip()))
-
     ry = header_y1 + 8
     for kind, label, icon, value in row_defs:
         draw_appearance_row_bg(c, rx, ry, rw, row_h)
@@ -2230,16 +2236,6 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
                           font=(APP_FONT_FAMILY, 14, APP_FONT_WEIGHT), anchor="w")
             outline_text(c, rx + rw - 18, rcy, str(value), (APP_FONT_FAMILY, 15, APP_FONT_WEIGHT),
                          PALETTE["value_text"], PALETTE["value_outline"], anchor="e")
-        elif kind == "note":
-            note_text = str(value)
-            note_h = max(row_h, 20 + (len(note_text) // 55) * 18)
-            draw_appearance_row_bg(c, rx, ry, rw, note_h)
-            c.create_text(rx + 20, ry + 12, text="Note", fill=PALETTE["label_text"],
-                          font=(APP_FONT_FAMILY, 11, APP_FONT_WEIGHT), anchor="nw")
-            c.create_text(rx + 20, ry + 28, text=note_text, fill=PALETTE["value_text"],
-                          font=(APP_FONT_FAMILY, 10), anchor="nw", width=rw - 36, justify="left")
-            ry += note_h + row_gap
-            continue
         else:
             draw_row_icon(c, rx + 18, rcy, label, icon)
             c.create_text(rx + 44, rcy, text=label, fill=PALETTE["label_text"],
@@ -2248,6 +2244,50 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
                          PALETTE["value_text"], PALETTE["value_outline"], anchor="e")
 
         ry += row_h + row_gap
+
+    if has_note:
+        note_header_y0 = ry + 14
+        note_header_y1 = note_header_y0 + 44
+
+        def toggle_note():
+            note_expanded[name] = not note_expanded.get(name, False)
+            show_details(parent, container, name, refresh_grid, active_tab)
+
+        note_hdr_id = round_rect(c, rx, note_header_y0, rx + rw, note_header_y1, r=14,
+                                   fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"], width=2)
+        note_arrow_id = c.create_text(rx + 22, (note_header_y0 + note_header_y1) / 2,
+                                       text=("\u25BC" if is_note_expanded else "\u25B6"),
+                                       fill=PALETTE["label_text"],
+                                       font=(APP_FONT_FAMILY, 13, APP_FONT_WEIGHT))
+        outline_text(c, rx + 50, (note_header_y0 + note_header_y1) / 2, "Note",
+                     (APP_FONT_FAMILY, 16, APP_FONT_WEIGHT),
+                     PALETTE["title_fill"], PALETTE["title_outline"], anchor="w")
+
+        note_btn_x = rx + rw - 90
+        note_btn_y0 = note_header_y0 + 8
+        note_btn_id = round_rect(c, note_btn_x, note_btn_y0, note_btn_x + 80, note_btn_y0 + 28,
+                                  r=8, fill=PALETTE["card_fill"], outline=PALETTE["panel_border"], width=1)
+        note_btn_lbl = c.create_text(note_btn_x + 40, note_btn_y0 + 14, text="Edit Note",
+                                      fill="white", font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT))
+
+        for item in (note_hdr_id, note_arrow_id):
+            c.tag_bind(item, "<Button-1>", lambda _e: toggle_note())
+        for item in (note_btn_id, note_btn_lbl):
+            c.tag_bind(item, "<Button-1>", lambda _e: handle_note())
+
+        if is_note_expanded:
+            note_text = d["Note"].strip()
+            note_lines = max(1, -(-len(note_text) // 55))
+            note_body_h = note_lines * 18 + 20
+            note_body_y = note_header_y1 + 6
+            draw_appearance_row_bg(c, rx, note_body_y, rw, note_body_h)
+            c.create_text(rx + 16, note_body_y + 10, text=note_text,
+                           fill=PALETTE["value_text"],
+                           font=(APP_FONT_FAMILY, 10), anchor="nw",
+                           width=rw - 32, justify="left")
+            ry = note_body_y + note_body_h + 6
+        else:
+            ry = note_header_y1 + 6
 
     traits_header_y0 = ry + 14
     traits_header_y1 = traits_header_y0 + 44
