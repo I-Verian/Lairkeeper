@@ -1374,8 +1374,8 @@ os.makedirs(COSMETIC_TRAIT_ICON_DIR, exist_ok=True)
 os.makedirs(FONTS_DIR, exist_ok=True)
 
 APP_FONT_FAMILY = "Fredoka"
-APP_VERSION = "1.4.0"
-GITHUB_REPO = "I-Verian/The-Lairkeeper"
+APP_VERSION = "1.4.1"
+GITHUB_REPO = "I-Verian/Lairkeeper"
 APP_FONT_WEIGHT = "bold"
 
 
@@ -2111,6 +2111,7 @@ def draw_trait_row(canvas, x, y, w, h, trait_entry, accent_color):
 
 genetic_traits_expanded = {}
 note_expanded = {}
+_sda_icon_cache = {}
 
 
 def show_details(parent, container, name, refresh_grid=None, active_tab=None):
@@ -2134,7 +2135,12 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
     if is_note_expanded:
         if has_note:
             note_text = d.get("Note", "").strip()
-            note_lines = max(1, -(-len(note_text) // 55))
+            try:
+                _nf = tkfont.Font(family=APP_FONT_FAMILY, size=10)
+                _avail = (W - 40) - 32
+                note_lines = max(1, -(-_nf.measure(note_text) // max(1, _avail)))
+            except Exception:
+                note_lines = max(1, -(-len(note_text) // 55))
             note_section_h += note_lines * 18 + 20
         else:
             note_section_h += 36 + 6
@@ -2479,7 +2485,12 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
         note_body_y = note_header_y1 + 6
         if has_note:
             note_text = d["Note"].strip()
-            note_lines = max(1, -(-len(note_text) // 55))
+            try:
+                _nf = tkfont.Font(family=APP_FONT_FAMILY, size=10)
+                _avail = rw - 32
+                note_lines = max(1, -(-_nf.measure(note_text) // max(1, _avail)))
+            except Exception:
+                note_lines = max(1, -(-len(note_text) // 55))
             note_body_h = note_lines * 18 + 20
             draw_appearance_row_bg(c, rx, note_body_y, rw, note_body_h)
             c.create_text(rx + 16, note_body_y + 10, text=note_text,
@@ -2650,7 +2661,7 @@ def open_sda_tracker(parent_win):
     grid_frame = tk.Frame(scroll_canvas, bg=PALETTE["bg_outer"])
     win_id = scroll_canvas.create_window((0, 0), window=grid_frame, anchor="nw")
 
-    icon_cache = {}
+    icon_cache = _sda_icon_cache
 
     def build_grid(available_width):
         for w in grid_frame.winfo_children():
@@ -3599,6 +3610,22 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
     form.configure(bg=PALETTE["bg_outer"])
     center(form, 480, 700)
 
+    _traces = []
+
+    def _traced(var, mode, cb):
+        tid = var.trace_add(mode, cb)
+        _traces.append((var, mode, tid))
+        return tid
+
+    def _cleanup_traces():
+        for v, m, tid in _traces:
+            try:
+                v.trace_remove(m, tid)
+            except Exception:
+                pass
+
+    form.bind("<Destroy>", lambda _e: _cleanup_traces())
+
     outer_canvas = tk.Canvas(form, bg=PALETTE["bg_outer"], highlightthickness=0)
     outer_canvas.pack(side="left", fill="both", expand=True)
     vscroll = tk.Scrollbar(form, command=outer_canvas.yview)
@@ -3689,8 +3716,8 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
         if known_rarity:
             rarity_var.set(known_rarity)
 
-    species_var.trace_add("write", sync_rarity_to_species)
-    species_var.trace_add("write", lambda *_: update_preview())
+    _traced(species_var, "write", sync_rarity_to_species)
+    _traced(species_var, "write", lambda *_: update_preview())
     sync_rarity_to_species()
     update_preview()
 
@@ -3770,7 +3797,7 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
             refresh()
 
     for var in color_vars:
-        var.trace_add("write", enforce_single_legendary)
+        _traced(var, "write", enforce_single_legendary)
     enforce_single_legendary()
 
     mutations_var, _mutations_combo = labeled_combo(body, "Mutations", [str(i) for i in range(MUTATION_CAP + 1)],
@@ -3836,9 +3863,9 @@ def open_dragon_form(parent_win, refresh_callback, dragon_id=None):
                 var.set("None")
             combo["values"] = neg_base
 
-    species_var.trace_add("write", sync_trait_options)
+    _traced(species_var, "write", sync_trait_options)
     for tvar, _ in positive_trait_combos:
-        tvar.trace_add("write", sync_trait_options)
+        _traced(tvar, "write", sync_trait_options)
     sync_trait_options()
 
     def save_dragon():
