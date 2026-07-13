@@ -1374,7 +1374,7 @@ os.makedirs(COSMETIC_TRAIT_ICON_DIR, exist_ok=True)
 os.makedirs(FONTS_DIR, exist_ok=True)
 
 APP_FONT_FAMILY = "Fredoka"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.4.0"
 GITHUB_REPO = "I-Verian/The-Lairkeeper"
 APP_FONT_WEIGHT = "bold"
 
