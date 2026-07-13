@@ -6,6 +6,9 @@ import json
 import math
 import os
 import calendar
+import subprocess
+import threading
+import urllib.request
 import sys
 from datetime import date
 import uuid
@@ -1178,6 +1181,8 @@ os.makedirs(COSMETIC_TRAIT_ICON_DIR, exist_ok=True)
 os.makedirs(FONTS_DIR, exist_ok=True)
 
 APP_FONT_FAMILY = "Fredoka"
+APP_VERSION = "1.0.0"
+GITHUB_REPO = "I-Verian/The-Lairkeeper"
 APP_FONT_WEIGHT = "bold"
 
 
@@ -1925,19 +1930,21 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
     is_traits_expanded = genetic_traits_expanded.get(name, False)
     is_note_expanded = note_expanded.get(name, False)
     has_note = bool(d.get("Note", "").strip())
+    is_note_expanded = note_expanded.get(name, False)
 
     extra_optional_rows = sum(1 for v in (d.get("Birthday"), d.get("OriginalOwner"), d.get("Element2")) if v)
 
     base_H = 728
     traits_extra = 262 if is_traits_expanded else 0
 
-    note_section_h = 0
-    if has_note:
-        note_section_h = 44 + 14
-        if is_note_expanded:
-            note_text = d["Note"].strip()
+    note_section_h = 44 + 14
+    if is_note_expanded:
+        if has_note:
+            note_text = d.get("Note", "").strip()
             note_lines = max(1, -(-len(note_text) // 55))
             note_section_h += note_lines * 18 + 20
+        else:
+            note_section_h += 36 + 6
 
     H = base_H + extra_optional_rows * 46 + traits_extra + note_section_h
     c = tk.Canvas(container, width=W, height=H,
@@ -2245,41 +2252,42 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
 
         ry += row_h + row_gap
 
-    if has_note:
-        note_header_y0 = ry + 14
-        note_header_y1 = note_header_y0 + 44
+    note_header_y0 = ry + 14
+    note_header_y1 = note_header_y0 + 44
 
-        def toggle_note():
-            note_expanded[name] = not note_expanded.get(name, False)
-            show_details(parent, container, name, refresh_grid, active_tab)
+    def toggle_note():
+        note_expanded[name] = not note_expanded.get(name, False)
+        show_details(parent, container, name, refresh_grid, active_tab)
 
-        note_hdr_id = round_rect(c, rx, note_header_y0, rx + rw, note_header_y1, r=14,
-                                   fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"], width=2)
-        note_arrow_id = c.create_text(rx + 22, (note_header_y0 + note_header_y1) / 2,
-                                       text=("\u25BC" if is_note_expanded else "\u25B6"),
-                                       fill=PALETTE["label_text"],
-                                       font=(APP_FONT_FAMILY, 13, APP_FONT_WEIGHT))
-        outline_text(c, rx + 50, (note_header_y0 + note_header_y1) / 2, "Note",
-                     (APP_FONT_FAMILY, 16, APP_FONT_WEIGHT),
-                     PALETTE["title_fill"], PALETTE["title_outline"], anchor="w")
+    note_hdr_id = round_rect(c, rx, note_header_y0, rx + rw, note_header_y1, r=14,
+                               fill=PALETTE["tag_fill"], outline=PALETTE["panel_border"], width=2)
+    note_arrow_id = c.create_text(rx + 22, (note_header_y0 + note_header_y1) / 2,
+                                   text=("\u25BC" if is_note_expanded else "\u25B6"),
+                                   fill=PALETTE["label_text"],
+                                   font=(APP_FONT_FAMILY, 13, APP_FONT_WEIGHT))
+    outline_text(c, rx + 50, (note_header_y0 + note_header_y1) / 2, "Note",
+                 (APP_FONT_FAMILY, 16, APP_FONT_WEIGHT),
+                 PALETTE["title_fill"], PALETTE["title_outline"], anchor="w")
 
-        note_btn_x = rx + rw - 90
-        note_btn_y0 = note_header_y0 + 8
-        note_btn_id = round_rect(c, note_btn_x, note_btn_y0, note_btn_x + 80, note_btn_y0 + 28,
-                                  r=8, fill=PALETTE["card_fill"], outline=PALETTE["panel_border"], width=1)
-        note_btn_lbl = c.create_text(note_btn_x + 40, note_btn_y0 + 14, text="Edit Note",
-                                      fill="white", font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT))
+    note_btn_label = "Edit Note" if has_note else "Add Note"
+    note_btn_x = rx + rw - 94
+    note_btn_y0 = note_header_y0 + 8
+    note_btn_id = round_rect(c, note_btn_x, note_btn_y0, note_btn_x + 84, note_btn_y0 + 28,
+                              r=8, fill=PALETTE["card_fill"], outline=PALETTE["panel_border"], width=1)
+    note_btn_lbl_id = c.create_text(note_btn_x + 42, note_btn_y0 + 14, text=note_btn_label,
+                                     fill="white", font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT))
 
-        for item in (note_hdr_id, note_arrow_id):
-            c.tag_bind(item, "<Button-1>", lambda _e: toggle_note())
-        for item in (note_btn_id, note_btn_lbl):
-            c.tag_bind(item, "<Button-1>", lambda _e: handle_note())
+    for item in (note_hdr_id, note_arrow_id):
+        c.tag_bind(item, "<Button-1>", lambda _e: toggle_note())
+    for item in (note_btn_id, note_btn_lbl_id):
+        c.tag_bind(item, "<Button-1>", lambda _e: handle_note())
 
-        if is_note_expanded:
+    if is_note_expanded:
+        note_body_y = note_header_y1 + 6
+        if has_note:
             note_text = d["Note"].strip()
             note_lines = max(1, -(-len(note_text) // 55))
             note_body_h = note_lines * 18 + 20
-            note_body_y = note_header_y1 + 6
             draw_appearance_row_bg(c, rx, note_body_y, rw, note_body_h)
             c.create_text(rx + 16, note_body_y + 10, text=note_text,
                            fill=PALETTE["value_text"],
@@ -2287,7 +2295,13 @@ def show_details(parent, container, name, refresh_grid=None, active_tab=None):
                            width=rw - 32, justify="left")
             ry = note_body_y + note_body_h + 6
         else:
-            ry = note_header_y1 + 6
+            draw_appearance_row_bg(c, rx, note_body_y, rw, 36)
+            c.create_text(rx + 16, note_body_y + 18, text="No note added yet. Click \"Add Note\" to write one.",
+                           fill=PALETTE["label_text"], font=(APP_FONT_FAMILY, 9),
+                           anchor="w")
+            ry = note_body_y + 36 + 6
+    else:
+        ry = note_header_y1 + 6
 
     traits_header_y0 = ry + 14
     traits_header_y1 = traits_header_y0 + 44
@@ -3755,6 +3769,144 @@ def open_add_account_dialog(root, refresh_callback):
                     fill=PALETTE["bar_fill"], outline=PALETTE["bar_border"], text_fill="#16330F")
 
 
+def _version_tuple(v):
+    try:
+        return tuple(int(x) for x in v.lstrip("v").split("."))
+    except Exception:
+        return (0,)
+
+
+def fetch_latest_release():
+    """Hits the GitHub API and returns (tag, exe_download_url) or (None, None)."""
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+    req = urllib.request.Request(url, headers={"User-Agent": f"Lairkeeper/{APP_VERSION}"})
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read())
+        tag = data.get("tag_name", "").replace("Lairkeeper ", "").lstrip("v")
+        assets = data.get("assets", [])
+        dl_url = next(
+            (a["browser_download_url"] for a in assets
+             if a["name"].lower() == "lairkeeper.exe"),
+            None,
+        )
+        return tag, dl_url
+    except Exception:
+        return None, None
+
+
+def check_for_updates_async(parent_win, on_result):
+    """Runs the version check on a background thread so the UI doesn't freeze.
+    `on_result(tag, dl_url, is_newer)` is called on the main thread via .after()."""
+    def _worker():
+        tag, dl_url = fetch_latest_release()
+        newer = tag is not None and _version_tuple(tag) > _version_tuple(APP_VERSION)
+        parent_win.after(0, lambda: on_result(tag, dl_url, newer))
+    threading.Thread(target=_worker, daemon=True).start()
+
+
+def perform_update(parent_win, dl_url):
+    """Downloads the new exe to a temp file beside the current one, writes a
+    tiny updater.bat that swaps the files after the app exits, then quits."""
+    if not getattr(sys, "frozen", False):
+        messagebox.showinfo(
+            "Script mode",
+            "Auto-update only works when running the compiled Lairkeeper.exe.\n"
+            "To update the script version, download the latest code.py from GitHub.",
+            parent=parent_win)
+        return
+
+    exe_path = sys.executable
+    exe_dir = os.path.dirname(exe_path)
+    tmp_exe = os.path.join(exe_dir, "Lairkeeper_update.exe")
+    updater_bat = os.path.join(exe_dir, "_lk_updater.bat")
+
+    dlg = tk.Toplevel(parent_win)
+    dlg.title("Updating Lairkeeper")
+    dlg.configure(bg=PALETTE["bg_outer"])
+    center(dlg, 360, 120)
+    dlg.resizable(False, False)
+    status_var = tk.StringVar(value="Connecting…")
+    tk.Label(dlg, textvariable=status_var, fg="white", bg=PALETTE["bg_outer"],
+             font=(APP_FONT_FAMILY, 11, APP_FONT_WEIGHT)).pack(pady=(24, 8))
+    prog_canvas = tk.Canvas(dlg, width=300, height=14, bg=PALETTE["tag_fill"],
+                             highlightthickness=1, highlightbackground=PALETTE["panel_border"])
+    prog_canvas.pack()
+    prog_bar = prog_canvas.create_rectangle(0, 0, 0, 14, fill=PALETTE["bar_fill"], outline="")
+    dlg.update()
+
+    def _download():
+        try:
+            req = urllib.request.Request(dl_url, headers={"User-Agent": f"Lairkeeper/{APP_VERSION}"})
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                total = int(resp.headers.get("Content-Length", 0))
+                downloaded = 0
+                chunk = 65536
+                with open(tmp_exe, "wb") as f:
+                    while True:
+                        block = resp.read(chunk)
+                        if not block:
+                            break
+                        f.write(block)
+                        downloaded += len(block)
+                        if total:
+                            pct = downloaded / total
+                            parent_win.after(0, lambda p=pct: (
+                                prog_canvas.coords(prog_bar, 0, 0, 300 * p, 14),
+                                status_var.set(f"Downloading… {int(p*100)}%"),
+                                dlg.update_idletasks(),
+                            ))
+            parent_win.after(0, _swap)
+        except Exception as e:
+            parent_win.after(0, lambda: (
+                dlg.destroy(),
+                messagebox.showerror("Update failed", f"Download error:\n{e}", parent=parent_win),
+            ))
+
+    def _swap():
+        status_var.set("Installing…")
+        dlg.update()
+        bat = (
+            "@echo off\n"
+            "timeout /t 2 /nobreak >nul\n"
+            f'move /Y "{tmp_exe}" "{exe_path}"\n'
+            f'start "" "{exe_path}"\n'
+            'del "%~f0"\n'
+        )
+        with open(updater_bat, "w") as f:
+            f.write(bat)
+        subprocess.Popen(
+            ["cmd", "/c", updater_bat],
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+            close_fds=True,
+        )
+        parent_win.after(600, parent_win.destroy)
+
+    threading.Thread(target=_download, daemon=True).start()
+
+
+def open_update_dialog(parent_win, tag, dl_url):
+    dlg = tk.Toplevel(parent_win)
+    dlg.title("Update Available")
+    dlg.configure(bg=PALETTE["bg_outer"])
+    center(dlg, 380, 180)
+    dlg.resizable(False, False)
+    tk.Label(dlg, text=f"A new version is available!",
+             fg=PALETTE["title_fill"], bg=PALETTE["bg_outer"],
+             font=(APP_FONT_FAMILY, 14, APP_FONT_WEIGHT)).pack(pady=(20, 4))
+    tk.Label(dlg, text=f"Current: Lairkeeper v{APP_VERSION}     →     New: Lairkeeper v{tag}",
+             fg="white", bg=PALETTE["bg_outer"],
+             font=(APP_FONT_FAMILY, 10)).pack(pady=(0, 16))
+    btn_row = tk.Frame(dlg, bg=PALETTE["bg_outer"])
+    btn_row.pack()
+    tk.Button(btn_row, text="Update Now", command=lambda: (dlg.destroy(), perform_update(parent_win, dl_url)),
+               bg=PALETTE["bar_fill"], fg="#16330F", relief="flat",
+               font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT), padx=18, pady=6).pack(side="left", padx=8)
+    tk.Button(btn_row, text="Not Now", command=dlg.destroy,
+               bg=PALETTE["tag_fill"], fg="white", relief="flat",
+               font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT), padx=18, pady=6).pack(side="left", padx=8)
+
+
 def start():
     root = tk.Tk()
     root.title("Accounts")
@@ -3831,6 +3983,38 @@ def start():
     rounded_button(add_canvas, 0, 0, 380, 50, "+ Add Account",
                     lambda: open_add_account_dialog(root, render_accounts), r=14,
                     fill=PALETTE["badge_fill"], outline=PALETTE["badge_border"], text_fill="#3A2A06")
+
+    footer = tk.Frame(root, bg=PALETTE["bg_outer"])
+    footer.place(x=30, y=544, width=380)
+    version_label = tk.Label(footer, text=f"Lairkeeper v{APP_VERSION}", fg=PALETTE["label_text"],
+                              bg=PALETTE["bg_outer"], font=(APP_FONT_FAMILY, 9))
+    version_label.pack(side="left")
+
+    update_btn_var = tk.StringVar(value="Check for Updates")
+    update_btn = tk.Button(footer, textvariable=update_btn_var,
+                            command=lambda: _check_updates_clicked(),
+                            bg=PALETTE["tag_fill"], fg="white", relief="flat",
+                            font=(APP_FONT_FAMILY, 9), padx=10, pady=3,
+                            cursor="hand2")
+    update_btn.pack(side="right")
+
+    def _check_updates_clicked():
+        update_btn.configure(state="disabled")
+        update_btn_var.set("Checking…")
+
+        def on_result(tag, dl_url, is_newer):
+            update_btn.configure(state="normal")
+            if tag is None:
+                update_btn_var.set("No connection")
+                root.after(3000, lambda: update_btn_var.set("Check for Updates"))
+            elif is_newer:
+                update_btn_var.set(f"Lairkeeper v{tag} available!")
+                open_update_dialog(root, tag, dl_url)
+            else:
+                update_btn_var.set("Up to date ✓")
+                root.after(3000, lambda: update_btn_var.set("Check for Updates"))
+
+        check_for_updates_async(root, on_result)
 
     root.mainloop()
 
