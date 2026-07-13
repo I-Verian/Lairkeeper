@@ -71,13 +71,25 @@ if %errorlevel% neq 0 (
 echo manage_data.exe built successfully.
 
 echo.
+echo Copying assets folder to dist\...
+if exist assets (
+    xcopy /E /I /Y assets dist\assets >nul
+    echo Assets copied.
+) else (
+    echo WARNING: No assets folder found next to build.bat.
+    echo          Icons and fonts will be missing from the build.
+    echo          Create an assets\ folder here with your icons before sharing.
+)
+
+echo.
 echo ============================================
 echo  Done!
-echo  Both files are in the dist\ folder:
+echo  Your files are in the dist\ folder:
 echo    dist\Lairkeeper.exe
 echo    dist\manage_data.exe
+echo    dist\assets\
 echo.
-echo  Before sharing, copy your "assets" folder
-echo  into "dist", next to the .exe files.
+echo  Zip up the entire dist\ folder to share.
+echo  The assets\ folder must travel with the .exe files.
 echo ============================================
 pause
