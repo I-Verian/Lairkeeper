@@ -3996,31 +3996,43 @@ def _version_tuple(v):
         return (0,)
 
 
+def _clean_tag(raw_tag):
+    """Strips any prefix from a GitHub release tag to leave just the version
+    number. Handles 'v1.4.2', 'Lairkeeper v1.4.2', 'Lairkeeper1.4.2',
+    'Lairkeeper_v1.4.2' and plain '1.4.2'."""
+    import re as _re
+    cleaned = raw_tag.strip()
+    cleaned = _re.sub(r'(?i)^lairkeeper[\s_-]*', '', cleaned)
+    cleaned = cleaned.lstrip('vV')
+    return cleaned
+
+
 def fetch_latest_release():
-    """Hits the GitHub API and returns (tag, exe_download_url) or (None, None)."""
     url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
     req = urllib.request.Request(url, headers={"User-Agent": f"Lairkeeper/{APP_VERSION}"})
     try:
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read())
-        tag = data.get("tag_name", "").replace("Lairkeeper ", "").lstrip("v")
+        raw_tag = data.get("tag_name", "")
+        tag = _clean_tag(raw_tag)
         assets = data.get("assets", [])
         dl_url = next(
             (a["browser_download_url"] for a in assets
              if a["name"].lower() == "lairkeeper.exe"),
             None,
         )
+        print(f"[update] raw tag: {raw_tag!r}  →  parsed: {tag!r}  local: {APP_VERSION}")
         return tag, dl_url
-    except Exception:
+    except Exception as e:
+        print(f"[update] fetch failed: {e}")
         return None, None
 
 
 def check_for_updates_async(parent_win, on_result):
-    """Runs the version check on a background thread so the UI doesn't freeze.
-    `on_result(tag, dl_url, is_newer)` is called on the main thread via .after()."""
     def _worker():
         tag, dl_url = fetch_latest_release()
-        newer = tag is not None and _version_tuple(tag) > _version_tuple(APP_VERSION)
+        newer = bool(tag) and _version_tuple(tag) > _version_tuple(APP_VERSION)
+        print(f"[update] newer={newer}  remote={_version_tuple(tag) if tag else '?'}  local={_version_tuple(APP_VERSION)}")
         parent_win.after(0, lambda: on_result(tag, dl_url, newer))
     threading.Thread(target=_worker, daemon=True).start()
 
@@ -4231,7 +4243,7 @@ def start():
                 update_btn_var.set(f"Lairkeeper v{tag} available!")
                 open_update_dialog(root, tag, dl_url)
             else:
-                update_btn_var.set("Up to date ✓")
+                update_btn_var.set(f"Up to date (v{tag}) ✓")
                 root.after(3000, lambda: update_btn_var.set("Check for Updates"))
 
         check_for_updates_async(root, on_result)
