@@ -8,6 +8,7 @@ import os
 import calendar
 import subprocess
 import threading
+import zipfile
 import urllib.request
 import sys
 from datetime import date
@@ -3997,9 +3998,6 @@ def _version_tuple(v):
 
 
 def _clean_tag(raw_tag):
-    """Strips any prefix from a GitHub release tag to leave just the version
-    number. Handles 'v1.4.2', 'Lairkeeper v1.4.2', 'Lairkeeper1.4.2',
-    'Lairkeeper_v1.4.2' and plain '1.4.2'."""
     import re as _re
     cleaned = raw_tag.strip()
     cleaned = _re.sub(r'(?i)^lairkeeper[\s_-]*', '', cleaned)
@@ -4016,12 +4014,26 @@ def fetch_latest_release():
         raw_tag = data.get("tag_name", "")
         tag = _clean_tag(raw_tag)
         assets = data.get("assets", [])
+        print(f"[update] assets found: {[a['name'] for a in assets]}")
         dl_url = next(
             (a["browser_download_url"] for a in assets
              if a["name"].lower() == "lairkeeper.exe"),
             None,
         )
+        if dl_url is None:
+            dl_url = next(
+                (a["browser_download_url"] for a in assets
+                 if a["name"].lower().endswith(".zip")),
+                None,
+            )
+        if dl_url is None:
+            dl_url = next(
+                (a["browser_download_url"] for a in assets
+                 if a["name"].lower().endswith(".exe")),
+                None,
+            )
         print(f"[update] raw tag: {raw_tag!r}  →  parsed: {tag!r}  local: {APP_VERSION}")
+        print(f"[update] download url: {dl_url}")
         return tag, dl_url
     except Exception as e:
         print(f"[update] fetch failed: {e}")
@@ -4038,8 +4050,6 @@ def check_for_updates_async(parent_win, on_result):
 
 
 def perform_update(parent_win, dl_url):
-    """Downloads the new exe to a temp file beside the current one, writes a
-    tiny updater.bat that swaps the files after the app exits, then quits."""
     if not getattr(sys, "frozen", False):
         messagebox.showinfo(
             "Script mode",
@@ -4067,52 +4077,98 @@ def perform_update(parent_win, dl_url):
     prog_bar = prog_canvas.create_rectangle(0, 0, 0, 14, fill=PALETTE["bar_fill"], outline="")
     dlg.update()
 
+    def _set_status(text, pct=None):
+        status_var.set(text)
+        if pct is not None:
+            prog_canvas.coords(prog_bar, 0, 0, 300 * pct, 14)
+        try:
+            dlg.update_idletasks()
+        except Exception:
+            pass
+
     def _download():
         try:
+            print(f"[update] downloading from: {dl_url}")
             req = urllib.request.Request(dl_url, headers={"User-Agent": f"Lairkeeper/{APP_VERSION}"})
             with urllib.request.urlopen(req, timeout=120) as resp:
-                total = int(resp.headers.get("Content-Length", 0))
+                total = int(resp.headers.get("Content-Length") or 0)
                 downloaded = 0
-                chunk = 65536
+                chunks = []
+                while True:
+                    block = resp.read(65536)
+                    if not block:
+                        break
+                    chunks.append(block)
+                    downloaded += len(block)
+                    if total:
+                        pct = downloaded / total
+                        parent_win.after(0, lambda p=pct: _set_status(f"Downloading… {int(p*100)}%", p))
+                    else:
+                        parent_win.after(0, lambda b=downloaded: _set_status(f"Downloading… {b // 1024} KB"))
+
+            data = b"".join(chunks)
+            print(f"[update] download complete: {len(data)} bytes")
+
+            if dl_url.lower().endswith(".zip"):
+                import io as _io
+                tmp_dir = os.path.join(exe_dir, "_lk_update_tmp")
+                if os.path.exists(tmp_dir):
+                    import shutil as _sh
+                    _sh.rmtree(tmp_dir, ignore_errors=True)
+                os.makedirs(tmp_dir, exist_ok=True)
+                with zipfile.ZipFile(_io.BytesIO(data)) as zf:
+                    print(f"[update] zip contents: {zf.namelist()}")
+                    zf.extractall(tmp_dir)
+                entries = os.listdir(tmp_dir)
+                if len(entries) == 1 and os.path.isdir(os.path.join(tmp_dir, entries[0])):
+                    src_dir = os.path.join(tmp_dir, entries[0])
+                else:
+                    src_dir = tmp_dir
+                print(f"[update] source dir: {src_dir}")
+                parent_win.after(0, lambda sd=src_dir, td=tmp_dir: _swap(sd, td))
+            else:
                 with open(tmp_exe, "wb") as f:
-                    while True:
-                        block = resp.read(chunk)
-                        if not block:
-                            break
-                        f.write(block)
-                        downloaded += len(block)
-                        if total:
-                            pct = downloaded / total
-                            parent_win.after(0, lambda p=pct: (
-                                prog_canvas.coords(prog_bar, 0, 0, 300 * p, 14),
-                                status_var.set(f"Downloading… {int(p*100)}%"),
-                                dlg.update_idletasks(),
-                            ))
-            parent_win.after(0, _swap)
+                    f.write(data)
+                parent_win.after(0, lambda: _swap(None, None))
         except Exception as e:
-            parent_win.after(0, lambda: (
+            print(f"[update] download error: {e}")
+            parent_win.after(0, lambda err=str(e): (
                 dlg.destroy(),
-                messagebox.showerror("Update failed", f"Download error:\n{e}", parent=parent_win),
+                messagebox.showerror("Update failed", f"Download error:\n{err}", parent=parent_win),
             ))
 
-    def _swap():
-        status_var.set("Installing…")
-        dlg.update()
-        bat = (
-            "@echo off\n"
-            "timeout /t 2 /nobreak >nul\n"
-            f'move /Y "{tmp_exe}" "{exe_path}"\n'
-            f'start "" "{exe_path}"\n'
-            'del "%~f0"\n'
-        )
-        with open(updater_bat, "w") as f:
-            f.write(bat)
-        subprocess.Popen(
-            ["cmd", "/c", updater_bat],
-            creationflags=subprocess.CREATE_NEW_CONSOLE,
-            close_fds=True,
-        )
-        parent_win.after(600, parent_win.destroy)
+    def _swap(src_dir, tmp_dir):
+        try:
+            _set_status("Installing…", 1.0)
+            if src_dir:
+                bat = (
+                    "@echo off\n"
+                    "timeout /t 2 /nobreak >nul\n"
+                    f'xcopy /E /I /Y "{src_dir}\\*" "{exe_dir}\\"\n'
+                    f'rmdir /S /Q "{tmp_dir}"\n'
+                    f'start "" "{exe_path}"\n'
+                    'del "%~f0"\n'
+                )
+            else:
+                bat = (
+                    "@echo off\n"
+                    "timeout /t 2 /nobreak >nul\n"
+                    f'move /Y "{tmp_exe}" "{exe_path}"\n'
+                    f'start "" "{exe_path}"\n'
+                    'del "%~f0"\n'
+                )
+            with open(updater_bat, "w") as f:
+                f.write(bat)
+            subprocess.Popen(
+                ["cmd", "/c", updater_bat],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                close_fds=True,
+            )
+            parent_win.after(800, parent_win.destroy)
+        except Exception as e:
+            print(f"[update] swap error: {e}")
+            dlg.destroy()
+            messagebox.showerror("Update failed", f"Could not install update:\n{e}", parent=parent_win)
 
     threading.Thread(target=_download, daemon=True).start()
 

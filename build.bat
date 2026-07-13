@@ -20,24 +20,15 @@ if %errorlevel%==0 (
 
 if "!PYCMD!"=="" (
     echo Python wasn't found on this computer.
-    echo Trying to install it automatically via winget...
-    echo.
     where winget >nul 2>nul
     if %errorlevel% neq 0 (
-        echo.
-        echo Winget isn't available on this machine either.
-        echo Please install Python yourself from:
-        echo   https://www.python.org/downloads/
+        echo Please install Python from https://www.python.org/downloads/
         echo IMPORTANT: check "Add Python to PATH" during setup.
-        echo Then re-run this script.
         pause
         exit /b 1
     )
-
     winget install -e --id Python.Python.3.12 --accept-package-agreements --accept-source-agreements
-    echo.
-    echo Python was just installed. Close this window and run build.bat
-    echo again so the terminal picks up the new PATH.
+    echo Python installed. Re-run build.bat.
     pause
     exit /b 0
 )
@@ -46,50 +37,36 @@ echo Found Python:
 !PYCMD! --version
 
 echo.
-echo Installing/updating build tools (pyinstaller, pillow)...
+echo Installing/updating build tools...
 !PYCMD! -m pip install --upgrade pip
 !PYCMD! -m pip install --upgrade pyinstaller pillow
 
 echo.
-echo Building Lairkeeper.exe...
-!PYCMD! -m PyInstaller --onefile --windowed --name "Lairkeeper" --specpath "spec_lairkeeper" code.py
+echo Building Lairkeeper...
+!PYCMD! -m PyInstaller --onedir --windowed --name "Lairkeeper" --specpath "spec_lairkeeper" code.py
 if %errorlevel% neq 0 (
-    echo ERROR: Lairkeeper build failed.
+    echo ERROR: Build failed.
     pause
     exit /b 1
 )
-echo Lairkeeper.exe built successfully.
 
 echo.
-echo Building manage_data.exe...
-!PYCMD! -m PyInstaller --onefile --windowed --name "manage_data" --specpath "spec_manage" manage_data.py
-if %errorlevel% neq 0 (
-    echo ERROR: manage_data build failed.
-    pause
-    exit /b 1
-)
-echo manage_data.exe built successfully.
-
-echo.
-echo Copying assets folder to dist\...
+echo Copying assets...
 if exist assets (
-    xcopy /E /I /Y assets dist\assets >nul
+    xcopy /E /I /Y assets dist\Lairkeeper\assets >nul
     echo Assets copied.
 ) else (
-    echo WARNING: No assets folder found next to build.bat.
-    echo          Icons and fonts will be missing from the build.
-    echo          Create an assets\ folder here with your icons before sharing.
+    echo WARNING: No assets folder found.
 )
+
+if exist README.txt copy /Y README.txt dist\Lairkeeper\README.txt >nul
 
 echo.
 echo ============================================
-echo  Done!
-echo  Your files are in the dist\ folder:
-echo    dist\Lairkeeper.exe
-echo    dist\manage_data.exe
-echo    dist\assets\
+echo  Done! Files are in dist\Lairkeeper\
 echo.
-echo  Zip up the entire dist\ folder to share.
-echo  The assets\ folder must travel with the .exe files.
+echo  To release: select everything INSIDE
+echo  dist\Lairkeeper\ and zip those files
+echo  (not the Lairkeeper folder itself).
 echo ============================================
 pause
