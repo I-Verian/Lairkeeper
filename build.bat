@@ -43,7 +43,7 @@ echo Installing/updating build tools...
 
 echo.
 echo Building Lairkeeper...
-!PYCMD! -m PyInstaller --onedir --windowed --name "Lairkeeper" --specpath "spec_lairkeeper" code.py
+!PYCMD! -m PyInstaller --onedir --windowed --name "Lairkeeper" --specpath "spec_lairkeeper" --collect-all tkinter code.py
 if %errorlevel% neq 0 (
     echo ERROR: Build failed.
     pause
