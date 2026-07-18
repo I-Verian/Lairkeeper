@@ -45,10 +45,21 @@ echo.
 echo Building Lairkeeper...
 !PYCMD! -m PyInstaller --onedir --windowed --name "Lairkeeper" --specpath "spec_lairkeeper" --collect-all tkinter code.py
 if %errorlevel% neq 0 (
-    echo ERROR: Build failed.
+    echo ERROR: Lairkeeper build failed.
     pause
     exit /b 1
 )
+echo Lairkeeper built successfully.
+
+echo.
+echo Building manage_data...
+!PYCMD! -m PyInstaller --onefile --windowed --name "manage_data" --specpath "spec_manage" manage_data.py
+if %errorlevel% neq 0 (
+    echo ERROR: manage_data build failed.
+    pause
+    exit /b 1
+)
+echo manage_data built successfully.
 
 echo.
 echo Copying assets...
@@ -68,5 +79,7 @@ echo.
 echo  To release: select everything INSIDE
 echo  dist\Lairkeeper\ and zip those files
 echo  (not the Lairkeeper folder itself).
+echo  manage_data.exe is in dist\ separately
+echo  (keep it private).
 echo ============================================
 pause

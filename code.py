@@ -867,6 +867,7 @@ SPECIES_LIST = [
     'Roborus V',
     'Roborus X',
     'Rocirus',
+    'Rocky',
     'Rozora',
     'Saurium',
     'Scrawei',
@@ -923,6 +924,7 @@ SPECIES_LIST = [
     'Vulcoramor',
     'Vulpiruth',
     'Vyreas',
+    'Wisp',
     'Woodluma',
     'Wuonghou',
     'Xellatruce',
@@ -1160,6 +1162,8 @@ SPECIES_RARITY = {
     'Archogine': 'Legendary',
     'Flame': 'Epic',
     'Shard': 'Epic',
+    'Rocky': 'Epic',
+    'Wisp': 'Epic',
 }
 
 PUPIL_LIST = [
@@ -1282,9 +1286,11 @@ SDA_EXCLUDED = {
     'Flame',
     'Mountain Dragon',
     'Riyu',
+    'Rocky',
     'Shard',
     'Source Dragon of Energy',
     'Source Dragon of Motion',
+    'Wisp',
 }
 AGE_LIST = ["Baby", "Juvenile", "Adult", "Elder"]
 MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
@@ -1377,7 +1383,7 @@ os.makedirs(COSMETIC_TRAIT_ICON_DIR, exist_ok=True)
 os.makedirs(FONTS_DIR, exist_ok=True)
 
 APP_FONT_FAMILY = "Fredoka"
-APP_VERSION = "1.5.0"
+APP_VERSION = "1.5.2"
 GITHUB_REPO = "I-Verian/Lairkeeper"
 APP_FONT_WEIGHT = "bold"
 
@@ -1418,11 +1424,6 @@ def load_custom_fonts():
                             f"(file may be corrupt or not a valid font)")
                 except Exception as e:
                     log(f"[fonts] Failed to register {fname}: {e}")
-            try:
-                HWND_BROADCAST, WM_FONTCHANGE = 0xFFFF, 0x001D
-                ctypes.windll.user32.SendMessageW(HWND_BROADCAST, WM_FONTCHANGE, 0, 0)
-            except Exception:
-                pass
 
     try:
         resolved = tkfont.Font(family=APP_FONT_FAMILY, size=20, weight=APP_FONT_WEIGHT).actual()
@@ -1819,8 +1820,11 @@ def move_dragon_to_account(dragon_id, dest_account):
 
 
 def center(win, w, h):
-    x = (win.winfo_screenwidth() - w) // 2
-    y = (win.winfo_screenheight() - h) // 2
+    win.update_idletasks()
+    sw = win.winfo_screenwidth()
+    sh = win.winfo_screenheight()
+    x = max(0, min((sw - w) // 2, sw - w))
+    y = max(0, min((sh - h) // 2, sh - h))
     win.geometry(f"{w}x{h}+{x}+{y}")
 
 
@@ -2151,9 +2155,7 @@ def draw_row_icon(canvas, x, y, label, icon_value):
         if not icon_value or icon_value == "None":
             return
         if not try_icon(canvas, x, y, cosmetic_trait_icon_path(icon_value), size=24):
-            fallback = os.path.join(MISC_DIR, "costrait.png")
-            if not try_icon(canvas, x, y, fallback, size=24):
-                canvas.create_text(x, y, text="\U0001FA84", font=(APP_FONT_FAMILY, 17))
+            try_icon(canvas, x, y, os.path.join(MISC_DIR, "costrait.png"), size=24)
     elif label in ROW_ICON_FILES:
         path = os.path.join(MISC_DIR, ROW_ICON_FILES[label])
         if not try_icon(canvas, x, y, path, size=24):
@@ -2920,7 +2922,17 @@ def parse_quick_dragon(text):
     except ValueError:
         mutations = 0
 
-    cosmetic = get(12) or "None"
+    cosmetic_raw = get(12).strip()
+    if cosmetic_raw and cosmetic_raw.lower() != "none":
+        raw_lower = cosmetic_raw.lower()
+        cosmetic = (
+            next((t for t in COSMETIC_TRAIT_LIST if t.lower() == raw_lower), None) or
+            next((t for t in COSMETIC_TRAIT_LIST if t.lower().startswith(raw_lower)), None) or
+            next((t for t in COSMETIC_TRAIT_LIST if raw_lower in t.lower()), None) or
+            cosmetic_raw
+        )
+    else:
+        cosmetic = "None"
     element = get(13) or (ELEMENT_LIST[0] if ELEMENT_LIST else "-")
     pupil = get(14) or (PUPIL_LIST[0] if PUPIL_LIST else "-")
     gen_raw = get(15)
@@ -3015,10 +3027,11 @@ def open_quick_add(parent_win, refresh_callback):
     dlg.configure(bg=PALETTE["bg_outer"])
     sw = dlg.winfo_screenwidth()
     sh = dlg.winfo_screenheight()
-    dw = min(760, sw - 60)
+    dw = max(720, min(820, sw - 60))
     dh = min(540, sh - 80)
     center(dlg, dw, dh)
     dlg.resizable(True, True)
+    dlg.minsize(720, 400)
 
     header = tk.Frame(dlg, bg=PALETTE["bg_outer"])
     header.pack(fill="x", padx=16, pady=(14, 6))
@@ -3027,6 +3040,17 @@ def open_quick_add(parent_win, refresh_callback):
 
     body = tk.Frame(dlg, bg=PALETTE["bg_outer"])
     body.pack(fill="both", expand=True, padx=16, pady=4)
+
+    right = tk.Frame(body, bg=PALETTE["panel_fill"], width=220)
+    right.pack(side="right", fill="y")
+    right.pack_propagate(False)
+    tk.Label(right, text="Line order:", fg=PALETTE["title_fill"],
+             bg=PALETTE["panel_fill"], font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT)).pack(
+        anchor="w", padx=10, pady=(10, 4))
+    for ref in QUICK_ADD_REFERENCE:
+        tk.Label(right, text=ref, fg=PALETTE["label_text"],
+                  bg=PALETTE["panel_fill"], font=(APP_FONT_FAMILY, 8),
+                  justify="left", anchor="w").pack(anchor="w", padx=10)
 
     left = tk.Frame(body, bg=PALETTE["bg_outer"])
     left.pack(side="left", fill="both", expand=True, padx=(0, 10))
@@ -3043,17 +3067,6 @@ def open_quick_add(parent_win, refresh_callback):
     txt.configure(yscrollcommand=txt_scroll.set)
     txt.pack(side="left", fill="both", expand=True)
     txt_scroll.pack(side="right", fill="y")
-
-    right = tk.Frame(body, bg=PALETTE["panel_fill"], width=210)
-    right.pack(side="right", fill="y")
-    right.pack_propagate(False)
-    tk.Label(right, text="Line order:", fg=PALETTE["title_fill"],
-             bg=PALETTE["panel_fill"], font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT)).pack(
-        anchor="w", padx=10, pady=(10, 4))
-    for ref in QUICK_ADD_REFERENCE:
-        tk.Label(right, text=ref, fg=PALETTE["label_text"],
-                  bg=PALETTE["panel_fill"], font=(APP_FONT_FAMILY, 8),
-                  justify="left", anchor="w").pack(anchor="w", padx=10)
 
     preview_var = tk.StringVar(value="")
     preview = tk.Label(dlg, textvariable=preview_var, fg=PALETTE["label_text"],
@@ -3627,24 +3640,44 @@ def open_lair(root, account):
             is_active = active_tab["id"] == tab_id
             fill = PALETTE["badge_fill"] if is_active else PALETTE["tag_fill"]
             text_color = "#3A2A06" if is_active else "white"
-            btn_w = max(80, len(label) * 9 + 20)
+            btn_w = max(70, len(label) * 9 + 24)
             c = tk.Canvas(tab_inner, width=btn_w, height=30, bg=PALETTE["lair_bg"], highlightthickness=0)
             c.pack(side="left", padx=(0, 4))
             round_rect(c, 1, 1, btn_w - 1, 29, r=10, fill=fill, outline=PALETTE["panel_border"], width=2)
-            c.create_text(btn_w // 2 - (0 if is_all else 6), 15, text=label,
+            c.create_text(btn_w // 2, 15, text=label,
                           fill=text_color, font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT))
             c.bind("<Button-1>", lambda _e: select_tab(tab_id))
 
             if not is_all:
-                del_x = btn_w - 10
-                del_id = c.create_text(del_x, 15, text="✕", fill="#FF8888",
-                                        font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT))
-                c.tag_bind(del_id, "<Button-1>", lambda _e, t=tab_id: confirm_delete_tab(t))
+                action_frame = tk.Frame(tab_inner, bg=PALETTE["lair_bg"])
 
-                edit_x = btn_w - 22
-                edit_id = c.create_text(edit_x, 15, text="✎", fill="#CCC",
-                                         font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT))
-                c.tag_bind(edit_id, "<Button-1>", lambda _e, t=tab_id, n=label: open_rename_tab(t, n))
+                ren_btn = tk.Label(action_frame, text="✎", fg="#CCC", bg=PALETTE["card_fill"],
+                                    font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT), cursor="hand2",
+                                    padx=3, pady=1)
+                ren_btn.pack(side="left", padx=(0, 2))
+                ren_btn.bind("<Button-1>", lambda _e, t=tab_id, n=label: open_rename_tab(t, n))
+
+                del_btn = tk.Label(action_frame, text="✕", fg="#FF8888", bg=PALETTE["card_fill"],
+                                    font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT), cursor="hand2",
+                                    padx=3, pady=1)
+                del_btn.pack(side="left")
+                del_btn.bind("<Button-1>", lambda _e, t=tab_id: confirm_delete_tab(t))
+
+                def _show_actions(e=None, af=action_frame, canvas=c):
+                    af.place(in_=canvas, x=0, rely=1.0, anchor="nw")
+                    af.lift()
+
+                def _hide_actions(e=None, af=action_frame):
+                    af.place_forget()
+
+                c.bind("<Enter>", _show_actions)
+                c.bind("<Leave>", lambda e, af=action_frame: af.place_forget() if not (
+                    af.winfo_containing(e.x_root, e.y_root) in af.winfo_children()
+                    or af.winfo_containing(e.x_root, e.y_root) is af
+                ) else None)
+                action_frame.bind("<Leave>", _hide_actions)
+                for child in (ren_btn, del_btn):
+                    child.bind("<Leave>", _hide_actions)
 
         make_tab_btn(None, "All Dragons", is_all=True)
         for tab_id, tab in current_tabs.items():
@@ -3679,19 +3712,24 @@ def open_lair(root, account):
         dlg = tk.Toplevel(win)
         dlg.title("Rename Tab")
         dlg.configure(bg=PALETTE["bg_outer"])
-        center(dlg, 320, 160)
-        tk.Label(dlg, text="New name:", fg=PALETTE["label_text"], bg=PALETTE["bg_outer"],
+        center(dlg, 320, 170)
+        tk.Label(dlg, text="New name (max 22 chars):", fg=PALETTE["label_text"], bg=PALETTE["bg_outer"],
                  font=(APP_FONT_FAMILY, 11, APP_FONT_WEIGHT)).pack(pady=(18, 4))
         var = tk.StringVar(value=current_name)
         e = tk.Entry(dlg, textvariable=var, bg=PALETTE["tag_fill"], fg="white",
                       insertbackground="white", relief="flat", font=(APP_FONT_FAMILY, 11))
         e.pack(fill="x", padx=20)
+        e.config(validate="key", validatecommand=(dlg.register(lambda s: len(s) <= 22), "%P"))
         def save():
             n = var.get().strip()
-            if n:
-                rename_tab(tab_id, n)
-                rebuild_tab_bar()
-                dlg.destroy()
+            if not n:
+                return
+            if len(n) > 22:
+                messagebox.showwarning("Too long", "Tab name must be 22 characters or less.", parent=dlg)
+                return
+            rename_tab(tab_id, n)
+            rebuild_tab_bar()
+            dlg.destroy()
         tk.Button(dlg, text="Save", command=save, bg=PALETTE["bar_fill"], fg="#16330F",
                    relief="flat", font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT)).pack(pady=14)
         e.bind("<Return>", lambda _e: save())
@@ -3701,20 +3739,25 @@ def open_lair(root, account):
         dlg = tk.Toplevel(win)
         dlg.title("New Tab")
         dlg.configure(bg=PALETTE["bg_outer"])
-        center(dlg, 320, 160)
-        tk.Label(dlg, text="Tab name:", fg=PALETTE["label_text"], bg=PALETTE["bg_outer"],
+        center(dlg, 320, 170)
+        tk.Label(dlg, text="Tab name (max 22 chars):", fg=PALETTE["label_text"], bg=PALETTE["bg_outer"],
                  font=(APP_FONT_FAMILY, 11, APP_FONT_WEIGHT)).pack(pady=(18, 4))
         var = tk.StringVar()
         e = tk.Entry(dlg, textvariable=var, bg=PALETTE["tag_fill"], fg="white",
                       insertbackground="white", relief="flat", font=(APP_FONT_FAMILY, 11))
         e.pack(fill="x", padx=20)
+        e.config(validate="key", validatecommand=(dlg.register(lambda s: len(s) <= 22), "%P"))
         def create():
             n = var.get().strip()
-            if n:
-                new_id = create_tab(n)
-                rebuild_tab_bar()
-                select_tab(new_id)
-                dlg.destroy()
+            if not n:
+                return
+            if len(n) > 22:
+                messagebox.showwarning("Too long", "Tab name must be 22 characters or less.", parent=dlg)
+                return
+            new_id = create_tab(n)
+            rebuild_tab_bar()
+            select_tab(new_id)
+            dlg.destroy()
         tk.Button(dlg, text="Create", command=create, bg=PALETTE["bar_fill"], fg="#16330F",
                    relief="flat", font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT)).pack(pady=14)
         e.bind("<Return>", lambda _e: create())
@@ -3857,8 +3900,10 @@ def import_dragon_custom_image(source_path, dragon_id):
 
 
 def cosmetic_trait_icon_path(trait):
-    base = trait.lower().replace(" ", "_")
-    base_nospace = trait.lower().replace(" ", "")
+    import re as _re
+    safe = _re.sub(r'[\\/:*?"<>|]', '', trait)
+    base = safe.lower().replace(" ", "_")
+    base_nospace = safe.lower().replace(" ", "")
     candidates = [
         f"{base}_icon.png",
         f"{base}.png",
@@ -4842,11 +4887,17 @@ def perform_update(parent_win, dl_url):
     def _swap(src_dir, tmp_dir):
         try:
             _set_status("Installing…", 1.0)
+            exe_name = os.path.basename(exe_path)
             if src_dir:
                 bat = (
                     "@echo off\n"
-                    "timeout /t 2 /nobreak >nul\n"
-                    f'xcopy /E /I /Y "{src_dir}\\*" "{exe_dir}\\"\n'
+                    ":waitloop\n"
+                    f'tasklist /FI "IMAGENAME eq {exe_name}" 2>NUL | find /I "{exe_name}" >NUL\n'
+                    'if "%ERRORLEVEL%"=="0" (\n'
+                    "    timeout /t 1 /nobreak >nul\n"
+                    "    goto waitloop\n"
+                    ")\n"
+                    f'xcopy /E /I /Y "{src_dir}\\*" "{exe_dir}."\n'
                     f'rmdir /S /Q "{tmp_dir}"\n'
                     f'start "" "{exe_path}"\n'
                     'del "%~f0"\n'
@@ -4854,7 +4905,12 @@ def perform_update(parent_win, dl_url):
             else:
                 bat = (
                     "@echo off\n"
-                    "timeout /t 2 /nobreak >nul\n"
+                    ":waitloop\n"
+                    f'tasklist /FI "IMAGENAME eq {exe_name}" 2>NUL | find /I "{exe_name}" >NUL\n'
+                    'if "%ERRORLEVEL%"=="0" (\n'
+                    "    timeout /t 1 /nobreak >nul\n"
+                    "    goto waitloop\n"
+                    ")\n"
                     f'move /Y "{tmp_exe}" "{exe_path}"\n'
                     f'start "" "{exe_path}"\n'
                     'del "%~f0"\n'
@@ -4862,7 +4918,8 @@ def perform_update(parent_win, dl_url):
             with open(updater_bat, "w") as f:
                 f.write(bat)
             subprocess.Popen(
-                ["cmd", "/c", updater_bat],
+                f'cmd /c "{updater_bat}"',
+                shell=True,
                 creationflags=subprocess.CREATE_NO_WINDOW,
                 close_fds=True,
             )
@@ -4897,13 +4954,55 @@ def open_update_dialog(parent_win, tag, dl_url):
                font=(APP_FONT_FAMILY, 10, APP_FONT_WEIGHT), padx=18, pady=6).pack(side="left", padx=8)
 
 
+def _dlog(msg):
+    import datetime
+    line = f"[{datetime.datetime.now().strftime('%H:%M:%S.%f')}] {msg}"
+    try:
+        _dlog._file.write(line + "\n")
+        _dlog._file.flush()
+    except Exception:
+        pass
+
+
+def _init_debug_log():
+    import sys
+    log_path = os.path.join(SCRIPT_DIR, "lairkeeper_debug.log")
+    try:
+        _dlog._file = open(log_path, "w", encoding="utf-8", buffering=1)
+    except Exception:
+        _dlog._file = None
+    _dlog(f"=== Lairkeeper Debug Log ===")
+    _dlog(f"Version: {APP_VERSION}")
+    _dlog(f"Python: {sys.version}")
+    _dlog(f"Frozen: {getattr(sys, 'frozen', False)}")
+    _dlog(f"SCRIPT_DIR: {SCRIPT_DIR}")
+    try:
+        import ctypes as _ct
+        _dlog(f"Primary monitor: {_ct.windll.user32.GetSystemMetrics(0)}x{_ct.windll.user32.GetSystemMetrics(1)}")
+        _dlog(f"Virtual desktop: {_ct.windll.user32.GetSystemMetrics(78)}x{_ct.windll.user32.GetSystemMetrics(79)}")
+    except Exception as e:
+        _dlog(f"Monitor info unavailable: {e}")
+
+
 def start():
+    _init_debug_log()
+    _dlog("Creating Tk root...")
     root = tk.Tk()
+    _dlog(f"Tk root created | screensize: {root.winfo_screenwidth()}x{root.winfo_screenheight()}")
     root.title("Accounts")
+    _dlog("Setting window icon...")
     set_window_icon(root)
+    _dlog("Loading fonts...")
     load_custom_fonts()
+    _dlog("Setting up ttk style...")
     setup_ttk_style(root)
+    _dlog("Centering window...")
     center(root, 440, 600)
+    _dlog(f"Geometry: {root.winfo_geometry()}")
+    root.lift()
+    root.attributes("-topmost", True)
+    root.after(200, lambda: root.attributes("-topmost", False))
+    _dlog("Building account screen...")
 
     bg_canvas = tk.Canvas(root, width=440, height=600, bg=PALETTE["bg_outer"], highlightthickness=0)
     bg_canvas.place(x=0, y=0, width=440, height=600)
@@ -5008,6 +5107,11 @@ def start():
 
         check_for_updates_async(root, on_result)
 
+    _dlog("Entering mainloop — app should be visible now")
+    try:
+        _dlog._file.close()
+    except Exception:
+        pass
     root.mainloop()
 
 
