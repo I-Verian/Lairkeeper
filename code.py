@@ -1162,8 +1162,8 @@ SPECIES_RARITY = {
     'Archogine': 'Legendary',
     'Flame': 'Epic',
     'Shard': 'Epic',
-    'Rocky': 'Epic',
     'Wisp': 'Epic',
+    'Rocky': 'Epic',
 }
 
 PUPIL_LIST = [
@@ -3411,8 +3411,19 @@ def open_lair(root, account):
 
     tab_scroll_canvas = tk.Canvas(tab_area, bg=PALETTE["lair_bg"], highlightthickness=0, height=36)
     tab_scroll_canvas.pack(side="top", fill="x")
+
+    tab_hscroll = tk.Scrollbar(tab_area, orient="horizontal", command=tab_scroll_canvas.xview)
+    tab_hscroll.pack(side="top", fill="x")
+    tab_scroll_canvas.configure(xscrollcommand=tab_hscroll.set)
+
     tab_inner = tk.Frame(tab_scroll_canvas, bg=PALETTE["lair_bg"])
     tab_scroll_canvas.create_window((0, 0), window=tab_inner, anchor="nw")
+
+    def _tab_hscroll(event):
+        tab_scroll_canvas.xview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    tab_scroll_canvas.bind("<Enter>", lambda _e: tab_scroll_canvas.bind_all("<MouseWheel>", _tab_hscroll))
+    tab_scroll_canvas.bind("<Leave>", lambda _e: tab_scroll_canvas.unbind_all("<MouseWheel>"))
 
     search_var = tk.StringVar()
     search_box = tk.Frame(left, bg=PALETTE["lair_bg"])
@@ -3641,43 +3652,29 @@ def open_lair(root, account):
             fill = PALETTE["badge_fill"] if is_active else PALETTE["tag_fill"]
             text_color = "#3A2A06" if is_active else "white"
             btn_w = max(70, len(label) * 9 + 24)
-            c = tk.Canvas(tab_inner, width=btn_w, height=30, bg=PALETTE["lair_bg"], highlightthickness=0)
-            c.pack(side="left", padx=(0, 4))
+
+            wrapper = tk.Frame(tab_inner, bg=PALETTE["lair_bg"])
+            wrapper.pack(side="left", padx=(0, 4))
+
+            c = tk.Canvas(wrapper, width=btn_w, height=30, bg=PALETTE["lair_bg"], highlightthickness=0)
+            c.pack(side="left")
             round_rect(c, 1, 1, btn_w - 1, 29, r=10, fill=fill, outline=PALETTE["panel_border"], width=2)
             c.create_text(btn_w // 2, 15, text=label,
                           fill=text_color, font=(APP_FONT_FAMILY, 9, APP_FONT_WEIGHT))
             c.bind("<Button-1>", lambda _e: select_tab(tab_id))
 
             if not is_all:
-                action_frame = tk.Frame(tab_inner, bg=PALETTE["lair_bg"])
+                ren = tk.Label(wrapper, text="✎", fg="#CCC", bg=PALETTE["card_fill"],
+                                font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT), cursor="hand2",
+                                padx=2, pady=0, height=1)
+                ren.pack(side="left", padx=(1, 0))
+                ren.bind("<Button-1>", lambda _e, t=tab_id, n=label: open_rename_tab(t, n))
 
-                ren_btn = tk.Label(action_frame, text="✎", fg="#CCC", bg=PALETTE["card_fill"],
-                                    font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT), cursor="hand2",
-                                    padx=3, pady=1)
-                ren_btn.pack(side="left", padx=(0, 2))
-                ren_btn.bind("<Button-1>", lambda _e, t=tab_id, n=label: open_rename_tab(t, n))
-
-                del_btn = tk.Label(action_frame, text="✕", fg="#FF8888", bg=PALETTE["card_fill"],
-                                    font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT), cursor="hand2",
-                                    padx=3, pady=1)
-                del_btn.pack(side="left")
-                del_btn.bind("<Button-1>", lambda _e, t=tab_id: confirm_delete_tab(t))
-
-                def _show_actions(e=None, af=action_frame, canvas=c):
-                    af.place(in_=canvas, x=0, rely=1.0, anchor="nw")
-                    af.lift()
-
-                def _hide_actions(e=None, af=action_frame):
-                    af.place_forget()
-
-                c.bind("<Enter>", _show_actions)
-                c.bind("<Leave>", lambda e, af=action_frame: af.place_forget() if not (
-                    af.winfo_containing(e.x_root, e.y_root) in af.winfo_children()
-                    or af.winfo_containing(e.x_root, e.y_root) is af
-                ) else None)
-                action_frame.bind("<Leave>", _hide_actions)
-                for child in (ren_btn, del_btn):
-                    child.bind("<Leave>", _hide_actions)
+                dlt = tk.Label(wrapper, text="✕", fg="#FF8888", bg=PALETTE["card_fill"],
+                                font=(APP_FONT_FAMILY, 8, APP_FONT_WEIGHT), cursor="hand2",
+                                padx=2, pady=0, height=1)
+                dlt.pack(side="left", padx=(1, 0))
+                dlt.bind("<Button-1>", lambda _e, t=tab_id: confirm_delete_tab(t))
 
         make_tab_btn(None, "All Dragons", is_all=True)
         for tab_id, tab in current_tabs.items():
